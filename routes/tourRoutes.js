@@ -1,0 +1,23 @@
+import express from 'express';
+
+import {
+  getAllTours,
+  createTour,
+  getTour,
+  updateTour,
+  deleteTour,
+  aliasTopTours,
+  // checkBody,
+} from '../controllers/tourController.js';
+
+const router = express.Router();
+
+//middle for the tour routes; checks if id is valid
+// router.param('id', checkID);middleware for params
+
+// router.route('/').get(getAllTours).post(checkBody, createTour); //middleware can be passed as the first arg before the controller fns
+router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
+router.route('/').get(getAllTours).post(createTour);
+router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
+
+export default router;
