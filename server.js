@@ -1,12 +1,12 @@
-import app from './app.js';
-import mongoose from 'mongoose';
-
 //this catches runtime errors that are not caught;
 process.on('uncaughtException', (err) => {
   console.log('UNCAUGHT EXCEPTION! shutting down!🤯');
   console.log(err.name, err.message);
   process.exit(1);
 });
+
+import app from './app.js';
+import mongoose from 'mongoose';
 
 const DB = process.env.DATABASE.replace(
   '<db_password>',
