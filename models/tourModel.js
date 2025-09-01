@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
-import validator from 'validator';
 //defining a schema
 const tourSchema = new mongoose.Schema(
   {
@@ -18,6 +17,7 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, 'Rating must be above 1.0'],
       max: [5, 'Rating must be below 5.0'],
+      set: (val) => Math.round(val * 10) / 10,
     },
     ratingsQuantity: { type: Number, default: 0 },
     price: { type: Number, required: [true, 'A tour must have a price'] },
@@ -81,6 +81,7 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
+    guides: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
   },
   //this options controls the virtual property
   {
@@ -89,9 +90,20 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
+
 //virtual property definition
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
+});
+
+//virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
 });
 
 //document middleware: runs before the save() and .create() but not on insertMany()
@@ -102,6 +114,18 @@ tourSchema.pre('save', function (next) {
   });
   next();
 });
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+});
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+//   next();
+// });
 //runs after the document is saved...
 // tourSchema.post('save',function(doc,next){
 //   console.log(doc);
@@ -122,6 +146,7 @@ tourSchema.pre('save', function (next) {
 //AGGREGATION MIDDLEWARE
 // tourSchema.pre('aggregate', function (next) {
 //   console.log(this); // this points to the aggregation object
+// this.pipeline().unshift({$match: {secretTour: {$ne: true}}})
 //   next();
 // });
 

@@ -11,9 +11,10 @@ import globalErrorHandler from './controllers/errorController.js';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
-import xssSanitizer from 'express-xss-sanitizer';
+import { xss } from 'express-xss-sanitizer';
 import hpp from 'hpp';
 import compression from 'compression';
+import reviewRouter from './routes/reviewRoutes.js';
 
 const app = express();
 
@@ -65,15 +66,11 @@ app.use(
 ); //enables the use of req.body
 
 //DATA SANITIZATION AGAINST NO NOSQL QUERY INJECITON
+// this won't work use @exortek/express-mongo-sanitize package instead
 app.use(mongoSanitize());
 
 //DATA SANITIZATION AGAINST XSS
-app.use(
-  xssSanitizer({
-    forbiddenTags: ['script', 'object', 'embed'],
-    forbiddenAttrs: ['onclick', 'onload', 'onerror', 'onmouseover'],
-  }),
-);
+app.use(xss());
 
 //prevent paramter pollution
 app.use(
@@ -100,6 +97,7 @@ app.use((req, res, next) => {
 //routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 //for undefined routes
 app.use((req, res, next) => {

@@ -1,4 +1,4 @@
-import { User } from '../models/userModel.js';
+import User from '../models/userModel.js';
 import AppError from '../utils/appError.js';
 import catchAsync from '../utils/catchAsync.js';
 import jwt from 'jsonwebtoken';
@@ -136,7 +136,7 @@ export const forgotPassword = catchAsync(async function (req, res, next) {
   //Send it to user's email
   const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
 
-  const message = `Forgot your password? Submit a PATCH request with your new password and passworcConfirm to : ${resetURL}. \nIf you didn't forget your password, please ignore this email`;
+  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to : ${resetURL}. \nIf you didn't forget your password, please ignore this email`;
   try {
     await sendEmail({
       email: user.email,
@@ -150,13 +150,13 @@ export const forgotPassword = catchAsync(async function (req, res, next) {
     });
   } catch (error) {
     user.passwordResetToken = undefined;
-    user.PasswordResetExpires = undefined;
+    user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
     return next(
       new AppError(
         'There was an error sending the email, Try again later!',
-        505,
+        500,
       ),
     );
   }
@@ -194,7 +194,7 @@ export const resetPassword = catchAsync(async function (req, res, next) {
 
 export const updatePassword = catchAsync(async function (req, res, next) {
   //GET user from collection
-  const user = await User.findById(req.user.id).select('+password');
+  const user = await User.findById(req.user._id).select('+password');
 
   //Check if POSTed current password is correct
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {

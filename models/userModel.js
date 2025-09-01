@@ -1,8 +1,7 @@
-import mongoose from 'mongoose';
-import validator from 'validator';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { networkInterfaces } from 'os';
+import mongoose from 'mongoose';
+import validator from 'validator';
 //fat models; thin controllers
 const userSchema = new mongoose.Schema({
   name: {
@@ -113,4 +112,6 @@ userSchema.methods.createPaswordResetToken = function () {
   return resetToken;
 };
 
-export const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+
+export default User;
