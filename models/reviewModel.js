@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Tour from './tourModel';
+import Tour from './tourModel.js';
 const reviewSchema = mongoose.Schema(
   {
     review: {
@@ -33,7 +33,7 @@ const reviewSchema = mongoose.Schema(
 );
 
 // this is so a user can only review a tour once
-reviewSchema.indexx({ tour: 1, user: 1 }, { unique: true });
+reviewSchema.index({ tour: 1, user: 1 }, { unique: true });
 
 reviewSchema.pre(/^find/, function (next) {
   // this.populate({

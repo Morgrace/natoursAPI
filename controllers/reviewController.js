@@ -1,11 +1,11 @@
-import Review from '../models/reviewModel';
+import Review from '../models/reviewModel.js';
 import {
   createOne,
   deleteOne,
   getAll,
   getOne,
   updateOne,
-} from './handlerFactory';
+} from './handlerFactory.js';
 
 export const setTourUserIds = (req, res, next) => {
   if (!req.body.tour) req.body.tour = req.params.tourId;

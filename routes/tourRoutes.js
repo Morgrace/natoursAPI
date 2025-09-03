@@ -1,20 +1,18 @@
 import express from 'express';
 
-import {
-  getAllTours,
-  createTour,
-  getTour,
-  updateTour,
-  deleteTour,
-  aliasTopTours,
-  getTourStats,
-  getMonthlyPlan,
-  getToursWithin,
-  getDistances,
-  // checkBody,
-} from '../controllers/tourController.js';
 import { protect, restrictTo } from '../controllers/authController.js';
-import { createReview } from '../controllers/reviewController.js';
+import {
+  aliasTopTours,
+  createTour,
+  deleteTour,
+  getAllTours,
+  getDistances,
+  getMonthlyPlan,
+  getTour,
+  getTourStats,
+  getToursWithin,
+  updateTour,
+} from '../controllers/tourController.js';
 import reviewRouter from './reviewRoutes.js';
 
 const router = express.Router();

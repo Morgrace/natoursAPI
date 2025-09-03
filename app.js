@@ -3,20 +3,34 @@ dotenv.config({ path: './config.env' });
 
 import express from 'express';
 import morgan from 'morgan';
-
-import tourRouter from './routes/tourRoutes.js';
-import userRouter from './routes/userRoutes.js';
-import AppError from './utils/appError.js';
-import globalErrorHandler from './controllers/errorController.js';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
+// import mongoSanitize from 'express-mongo-sanitize';
 import { xss } from 'express-xss-sanitizer';
 import hpp from 'hpp';
 import compression from 'compression';
+import path from 'node:path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+import tourRouter from './routes/tourRoutes.js';
+import userRouter from './routes/userRoutes.js';
 import reviewRouter from './routes/reviewRoutes.js';
+import viewRouter from './routes/viewRoutes.js';
+import AppError from './utils/appError.js';
+import globalErrorHandler from './controllers/errorController.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
+
+//define view engine
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+//for serving static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Trust proxy (important for rate limiting behind reverse proxy)
 app.set('trust proxy', 1);
@@ -67,7 +81,7 @@ app.use(
 
 //DATA SANITIZATION AGAINST NO NOSQL QUERY INJECITON
 // this won't work use @exortek/express-mongo-sanitize package instead
-app.use(mongoSanitize());
+// app.use(mongoSanitize());
 
 //DATA SANITIZATION AGAINST XSS
 app.use(xss());
@@ -86,9 +100,6 @@ app.use(
   }),
 );
 
-//for serving static files
-// app.use(express.static());
-
 app.use((req, res, next) => {
   req.requestTime = new Date().toLocaleDateString();
   next();
@@ -98,16 +109,10 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/', viewRouter);
 
 //for undefined routes
 app.use((req, res, next) => {
-  // res.status(404).json({
-  //   status: 'fail',
-  //   message: `Can't find ${req.originalUrl} on this server!`,
-  // });
-  // const err = new Error('cant find ...');
-  // err.status = 'fail';
-  // err.statusCode = 404;
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
